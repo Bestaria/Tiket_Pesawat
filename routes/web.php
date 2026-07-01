@@ -5,7 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AirlineController;
 use App\Http\Controllers\FlightController;
+use App\Http\Controllers\JadwalController; // <-- Tambahkan ini
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SeatController;
 use App\Models\Notification;
 
 // 1. HALAMAN UTAMA (Redirect ke Login)
@@ -40,10 +42,8 @@ Route::middleware('auth')->group(function () {
             return view('customer.dashboard'); 
         })->name('dashboard');
         
-        // Jadwal (Lihat Jadwal)
-        Route::get('/jadwal', function () { 
-            return view('customer.jadwal'); 
-        })->name('jadwal');
+        // Jadwal (Lihat Jadwal) - PAKAI CONTROLLER
+        Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal');
         
         // Booking - Create (form pemesanan)
         Route::get('/booking/create/{jadwal_id}', [BookingController::class, 'create'])->name('booking.create');
@@ -59,6 +59,12 @@ Route::middleware('auth')->group(function () {
         
         // Ticket PDF - Download
         Route::get('/booking/ticket/download/{id}', [BookingController::class, 'downloadPdf'])->name('booking.download');
+        
+        // ==========================================
+        // RUTE KURSI (SEATS)
+        // ==========================================
+        Route::get('/seats/{flight_id}', [SeatController::class, 'getAvailableSeats'])->name('seats.available');
+        Route::post('/seats/check', [SeatController::class, 'checkAvailability'])->name('seats.check');
         
         // NOTIFIKASI
         Route::post('/notification/mark-read/{id}', [NotificationController::class, 'markRead'])->name('notification.markRead');
@@ -95,8 +101,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/bookings', [BookingController::class, 'index'])->name('bookings.index');
         Route::get('/admin/bookings/{id}', [BookingController::class, 'show'])->name('bookings.show');
         Route::put('/admin/bookings/{id}', [BookingController::class, 'update'])->name('bookings.update');
-        Route::put('/admin/bookings/cancel/{id}', [BookingController::class, 'cancel'])->name('bookings.cancel'); // ✅ TAMBAHKAN INI
+        Route::put('/admin/bookings/cancel/{id}', [BookingController::class, 'cancel'])->name('bookings.cancel');
         Route::delete('/admin/bookings/{id}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+        
+        // ROUTE SEATS (Admin) - Untuk melihat manajemen kursi
+        Route::get('/admin/seats/{flight_id}', [SeatController::class, 'index'])->name('admin.seats.index');
+        Route::put('/admin/seats/{id}', [SeatController::class, 'update'])->name('admin.seats.update');
         
         // LAPORAN
         Route::get('/laporan', function () { 
@@ -106,6 +116,7 @@ Route::middleware('auth')->group(function () {
     
 });
 
+// NOTIFIKASI - Route tambahan (diluar middleware)
 Route::post('/notification/mark-read/{id}', function ($id) {
     $notif = Notification::where('user_id', auth()->id())->findOrFail($id);
     $notif->update(['is_read' => true]);
