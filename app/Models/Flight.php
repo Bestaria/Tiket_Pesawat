@@ -24,9 +24,9 @@ class Flight extends Model
     ];
 
     protected $casts = [
-        'tanggal_berangkat' => 'date',
-        'jam_berangkat' => 'datetime',
-        'jam_tiba' => 'datetime',
+        'tanggal_berangkat' => 'datetime',
+        'jam_berangkat' => 'datetime:H:i',
+        'jam_tiba' => 'datetime:H:i',
     ];
 
     public function airline()
@@ -39,11 +39,18 @@ class Flight extends Model
         return $this->hasMany(Booking::class);
     }
 
-    // ✅ Update sisa kuota
-    public function updateSisaKuota()
+    public function seats()
     {
-        $totalDipesan = $this->bookings()->whereIn('status', ['pending', 'confirmed'])->sum('jumlah_penumpang');
-        $this->sisa_kuota = $this->kuota - $totalDipesan;
-        $this->save();
+        return $this->hasMany(Seat::class);
+    }
+
+    public function getAvailableSeatsCount()
+    {
+        return $this->seats()->where('is_available', true)->count();
+    }
+
+    public function getTotalSeatsCount()
+    {
+        return $this->seats()->count();
     }
 }

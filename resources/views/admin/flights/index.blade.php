@@ -111,6 +111,23 @@ body {
     color: white;
 }
 
+/* ===== TOMBOL KURSI (TAMBAHAN) ===== */
+.btn-seats {
+    background: #6366f1;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 10px;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.btn-seats:hover {
+    background: #4f46e5;
+    color: white;
+}
+
 .badge-status {
     padding: 2px 8px;
     border-radius: 20px;
@@ -172,6 +189,7 @@ body {
     .card-table { padding: 16px; }
     .table-custom th, .table-custom td { padding: 5px 6px; font-size: 10px; }
     .btn-add { padding: 5px 12px; font-size: 12px; }
+    .btn-seats, .btn-edit, .btn-delete { font-size: 9px; padding: 2px 6px; }
 }
 </style>
 
@@ -238,13 +256,17 @@ body {
                         </td>
                         <td>
                             <div class="action-group">
-                                <a href="{{ route('flights.edit', $flight->id) }}" class="btn-edit">
+                                <!-- TOMBOL KURSI (TAMBAHAN) -->
+                                <a href="{{ route('admin.seats.index', $flight->id) }}" class="btn-seats" title="Kelola Kursi">
+                                    <i class="fas fa-chair"></i>
+                                </a>
+                                <a href="{{ route('flights.edit', $flight->id) }}" class="btn-edit" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <form action="{{ route('flights.destroy', $flight->id) }}" method="POST" style="display: inline-block;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn-delete" onclick="return confirm('Yakin ingin menghapus?')">
+                                    <button type="submit" class="btn-delete" onclick="return confirm('Yakin ingin menghapus?')" title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
