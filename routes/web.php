@@ -6,6 +6,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AirlineController;
 use App\Http\Controllers\FlightController;
 use App\Http\Controllers\NotificationController;
+use App\Models\Notification;
 
 // 1. HALAMAN UTAMA (Redirect ke Login)
 Route::get('/', function () {
@@ -104,3 +105,16 @@ Route::middleware('auth')->group(function () {
     });
     
 });
+
+Route::post('/notification/mark-read/{id}', function ($id) {
+    $notif = Notification::where('user_id', auth()->id())->findOrFail($id);
+    $notif->update(['is_read' => true]);
+    return back();
+})->name('notification.markRead');
+
+Route::post('/notification/mark-all-read', function () {
+    Notification::where('user_id', auth()->id())
+        ->where('is_read', false)
+        ->update(['is_read' => true]);
+    return back();
+})->name('notification.markAllRead');

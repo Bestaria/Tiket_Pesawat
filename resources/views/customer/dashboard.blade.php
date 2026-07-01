@@ -509,10 +509,18 @@ body::before {
         </div>
     </div>
 
-    <!-- NOTIFICATION -->
+    <!-- ============================================================ -->
+    <!-- NOTIFICATION - MENGGUNAKAN MODEL CUSTOM -->
+    <!-- ============================================================ -->
     @php
-        $notifications = auth()->user()->notifications()->limit(5)->get();
-        $unreadCount = auth()->user()->unreadNotifications()->count();
+        use App\Models\Notification;
+        $notifications = Notification::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+        $unreadCount = Notification::where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->count();
     @endphp
 
     <div class="card-notification">
@@ -548,7 +556,7 @@ body::before {
                                     <span style="background: #3b82f6; color: white; font-size: 9px; padding: 2px 8px; border-radius: 20px; margin-left: 6px;">BARU</span>
                                 @endif
                             </div>
-                            <div class="notif-message">{!! $notif->message !!}</div>
+                            <div class="notif-message">{{ $notif->message }}</div>
                             <div class="notif-time">
                                 <span class="notif-badge notif-badge-{{ $notif->type }}">
                                     {{ ucfirst($notif->type) }}
@@ -556,14 +564,14 @@ body::before {
                                 {{ $notif->created_at->diffForHumans() }}
                             </div>
                         </div>
-                        <div style="margin-left:10px;">
-                            @if(!$notif->is_read)
+                        @if(!$notif->is_read)
+                            <div style="margin-left:10px;">
                                 <form action="{{ route('notification.markRead', $notif->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn-mark-read">Tandai Dibaca</button>
                                 </form>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @empty
